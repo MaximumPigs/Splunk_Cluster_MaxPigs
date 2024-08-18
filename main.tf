@@ -1,10 +1,10 @@
 locals {
   project = "Splunk_Cluster"
 
-  searchhead_count = 1
-  indexer_count = 0
+  searchhead_count = 2
+  indexer_count = 2
   heavyforwarder_count = 0
-  manager_count = 0
+  manager_count = 1
 
   searchheads = toset([
     for i in range(local.searchhead_count) : format("splunksh%d", i)
@@ -73,18 +73,18 @@ module "indexer" {
   instance_type = "t3.medium"
 
   root_block_device = [{
-    volume_size = 12
+    volume_size = 15
   }]  
 
   tags = local.tags
 
-  associate_public_ip_address = false
+  associate_public_ip_address = true
 
   key_name = var.key_pair
 
-  subnet_id = module.maximumpigs_fabric.subnet_ap-southeast-2a_private_id
+  subnet_id = module.maximumpigs_fabric.subnet_ap-southeast-2a_public_id
 
-#  dns_pub_zone_name  = module.maximumpigs_fabric.route53_public_name
+  dns_pub_zone_name  = module.maximumpigs_fabric.route53_public_name
   dns_priv_zone_name = module.maximumpigs_fabric.route53_private_name
 
   vpc_security_group_ids = [module.maximumpigs_fabric.default_security_group_id]
@@ -146,9 +146,9 @@ module "manager" {
 
   key_name = var.key_pair
 
-  subnet_id = module.maximumpigs_fabric.subnet_ap-southeast-2a_private_id
+  subnet_id = module.maximumpigs_fabric.subnet_ap-southeast-2a_public_id
 
-#  dns_pub_zone_name  = module.maximumpigs_fabric.route53_public_name
+  dns_pub_zone_name  = module.maximumpigs_fabric.route53_public_name
   dns_priv_zone_name = module.maximumpigs_fabric.route53_private_name
 
   vpc_security_group_ids = [module.maximumpigs_fabric.default_security_group_id]

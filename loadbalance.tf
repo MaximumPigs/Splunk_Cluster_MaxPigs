@@ -21,6 +21,19 @@ resource "aws_lb_listener" "searchhead" {
   tags = local.tags
 }
 
+resource "aws_lb_listener" "searchhead_http" {
+  load_balancer_arn = aws_lb.front-end.arn
+  port              = "80"
+  protocol          = "TCP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.searchhead.arn
+  }
+
+  tags = local.tags
+}
+
 resource "aws_lb_listener" "heavyforwarder" {
   load_balancer_arn = aws_lb.front-end.arn
   port              = "9997"
@@ -43,6 +56,15 @@ resource "aws_lb_target_group" "searchhead" {
   tags = local.tags
 }
 
+resource "aws_lb_target_group" "searchhead_http" {
+  name     = "searchhead-http-lb-target-group"
+  port     = 80
+  protocol = "TCP"
+  vpc_id   = module.maximumpigs_fabric.vpc_id
+
+  tags = local.tags
+}
+
 resource "aws_lb_target_group" "heavyforwarder" {
   name     = "heavyforwarder-lb-target-group"
   port     = 9997
@@ -57,6 +79,13 @@ resource "aws_lb_target_group_attachment" "searchhead" {
   target_group_arn = aws_lb_target_group.searchhead.arn
   target_id        = each.value.id
   port             = 8000
+}
+
+resource "aws_lb_target_group_attachment" "searchhead_http" {
+  for_each = module.searchhead
+  target_group_arn = aws_lb_target_group.searchhead.arn
+  target_id        = each.value.id
+  port             = 80
 }
 
 resource "aws_lb_target_group_attachment" "heavyforwarder" {
