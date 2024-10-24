@@ -1,9 +1,9 @@
 locals {
   project = "Splunk_Cluster"
 
-  searchhead_count = 2
-  indexer_count = 2
-  heavyforwarder_count = 0
+  searchhead_count = 1
+  indexer_count = 1
+  heavyforwarder_count = 1
   manager_count = 1
 
   searchheads = toset([
