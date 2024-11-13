@@ -1,0 +1,40 @@
+searchhead:
+  hosts:
+    splunksh[0:3].aws.maximumpigs.com
+  vars:
+    ansible_user: ubuntu
+
+indexer:
+  hosts:
+    splunkidx[0:2].aws.maximumpigs.com
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_common_args: "-p 2222 -J ubuntu@splunksh0.aws.maximumpigs.com"
+
+heavyforwarder:
+  hosts:
+    hf0.aws.maximumpigs.com
+  vars:
+    ansible_user: ubuntu    
+
+manager0:
+  hosts:
+    splunkmgr0.aws.maximumpigs.com
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_common_args: "-p 2222 -J ubuntu@splunksh0.aws.maximumpigs.com"    
+
+manager1:
+  hosts:
+    splunkmgr1.aws.maximumpigs.com
+  vars:
+    ansible_user: ubuntu
+    ansible_ssh_common_args: "-p 2222 -J ubuntu@splunksh0.aws.maximumpigs.com"    
+
+all_hosts:
+  children:
+    searchhead:
+    indexer:
+    heavyforwarder:
+    manager0:
+    manager1:

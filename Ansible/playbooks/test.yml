@@ -1,0 +1,10 @@
+---
+- name: Update web servers
+  hosts: searchhead
+  remote_user: ubuntu
+
+  tasks:
+  - name: Update all packages to their latest version
+    ansible.builtin.apt:
+      name: "*"
+      state: latest
