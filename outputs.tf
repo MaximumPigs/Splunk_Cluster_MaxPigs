@@ -53,3 +53,7 @@ output "manager_private_ip" {
     index => instance.private_ip
   }
 }
+
+output "load_balancer_fqdn" {
+  value = aws_route53_record.frontend.name
+}

@@ -8,12 +8,10 @@ fqdn: "${hostname}.${domain}"
 
 runcmd: 
  - echo "127.0.0.1 ${hostname} ${hostname}.${domain} >> /etc/hosts"
-# - snap install --classic certbot
  - snap install --classic aws-cli
-# - certbot certonly --standalone -d ${hostname}.${domain} -n --agree-tos --email domain@maximumpigs.com
-# - wget -O /opt/splunk.deb "https://download.splunk.com/products/splunk/releases/9.3.0/linux/splunk-9.3.0-51ccf43db5bd-linux-2.6-amd64.deb"
  - aws s3 cp s3://maximumpigs-various/splunk.deb /opt/splunk.deb
  - aws s3 cp s3://maximumpigs-various/Splunk.License /opt/splunk.license
+ - aws s3 cp s3://maximumpigs-various/index_and_forward.tgz /opt/index_and_forward.tgz
  - dpkg -i /opt/splunk.deb
  - /opt/splunk/bin/splunk start --accept-license --answer-yes --seed-passwd "Administrator1!"
  - /opt/splunk/bin/splunk enable boot-start
