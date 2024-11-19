@@ -1,10 +1,10 @@
 locals {
   project = "Splunk_Cluster"
 
-  searchhead_count = 1
-  indexer_count = 1
-  heavyforwarder_count = 1
-  manager_count = 1
+  searchhead_count     = 2
+  indexer_count        = 2
+  heavyforwarder_count = 0
+  manager_count        = 2
 
   searchheads = toset([
     for i in range(local.searchhead_count) : format("splunksh%d", i)
@@ -39,7 +39,7 @@ module "searchhead" {
   instance_type = "t3.medium"
 
   root_block_device = [{
-    volume_size = 12
+    volume_size = 20
   }]
 
   tags = local.tags
@@ -57,7 +57,7 @@ module "searchhead" {
 
   user_data_base64 = base64encode(templatefile("cloudinit/userdata.tmpl", {
     hostname = "${each.value}",
-    domain = "${module.maximumpigs_fabric.route53_private_name}"}))
+  domain = "${module.maximumpigs_fabric.route53_private_name}" }))
 
   iam_instance_profile = "Generic_EC2_Role"
 }
@@ -73,8 +73,8 @@ module "indexer" {
   instance_type = "t3.medium"
 
   root_block_device = [{
-    volume_size = 15
-  }]  
+    volume_size = 20
+  }]
 
   tags = local.tags
 
@@ -91,7 +91,7 @@ module "indexer" {
 
   user_data_base64 = base64encode(templatefile("cloudinit/userdata.tmpl", {
     hostname = "${each.value}",
-    domain = "${module.maximumpigs_fabric.route53_private_name}"}))
+  domain = "${module.maximumpigs_fabric.route53_private_name}" }))
 
   iam_instance_profile = "Generic_EC2_Role"
 }
@@ -121,7 +121,7 @@ module "heavyforwarder" {
 
   user_data_base64 = base64encode(templatefile("cloudinit/userdata.tmpl", {
     hostname = "${each.value}",
-    domain = "${module.maximumpigs_fabric.route53_private_name}"}))
+  domain = "${module.maximumpigs_fabric.route53_private_name}" }))
 
   iam_instance_profile = "Generic_EC2_Role"
 }
@@ -137,8 +137,8 @@ module "manager" {
   instance_type = "t3.medium"
 
   root_block_device = [{
-    volume_size = 12
-  }]  
+    volume_size = 20
+  }]
 
   tags = local.tags
 
@@ -155,7 +155,7 @@ module "manager" {
 
   user_data_base64 = base64encode(templatefile("cloudinit/userdata.tmpl", {
     hostname = "${each.value}",
-    domain = "${module.maximumpigs_fabric.route53_private_name}"}))
+  domain = "${module.maximumpigs_fabric.route53_private_name}" }))
 
   iam_instance_profile = "Generic_EC2_Role"
 }

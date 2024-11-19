@@ -1,3 +1,5 @@
+# TODO - Fix load balancer - make ALB
+
 resource "aws_lb" "front-end" {
   name               = "front-end"
   internal           = false
@@ -12,7 +14,7 @@ resource "aws_lb_listener" "searchhead" {
   load_balancer_arn = aws_lb.front-end.arn
   port              = "443"
   protocol          = "TLS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = aws_acm_certificate.splunk.arn
 
   default_action {
@@ -27,8 +29,8 @@ resource "aws_lb_listener" "heavyforwarder" {
   load_balancer_arn = aws_lb.front-end.arn
   port              = "9997"
   protocol          = "TLS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = aws_acm_certificate.splunk.arn  
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = aws_acm_certificate.splunk.arn
 
   default_action {
     type             = "forward"
@@ -39,10 +41,10 @@ resource "aws_lb_listener" "heavyforwarder" {
 }
 
 resource "aws_lb_target_group" "searchhead" {
-  name     = "searchhead-lb-target-group"
-  port     = 8000
-  protocol = "TCP"
-  vpc_id   = module.maximumpigs_fabric.vpc_id
+  name             = "searchhead-lb-target-group"
+  port             = 8000
+  protocol         = "TCP"
+  vpc_id           = module.maximumpigs_fabric.vpc_id
 
   tags = local.tags
 }
@@ -57,21 +59,21 @@ resource "aws_lb_target_group" "heavyforwarder" {
 }
 
 resource "aws_lb_target_group_attachment" "searchhead" {
-  for_each = module.searchhead
+  for_each         = module.searchhead
   target_group_arn = aws_lb_target_group.searchhead.arn
   target_id        = each.value.id
   port             = 8000
 }
 
 resource "aws_lb_target_group_attachment" "heavyforwarder" {
-  for_each = module.heavyforwarder
+  for_each         = module.heavyforwarder
   target_group_arn = aws_lb_target_group.heavyforwarder.arn
   target_id        = each.value.id
   port             = 9997
 }
 
 resource "aws_acm_certificate" "splunk" {
-  domain_name = "splunk.${module.maximumpigs_fabric.route53_public_name}"
+  domain_name       = "splunk.${module.maximumpigs_fabric.route53_public_name}"
   validation_method = "DNS"
 
   tags = local.tags

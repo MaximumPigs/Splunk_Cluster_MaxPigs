@@ -22,7 +22,7 @@ resource "aws_vpc_security_group_ingress_rule" "http" {
   to_port     = 80
   ip_protocol = "tcp"
 
-  tags = local.tags  
+  tags = local.tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "https" {
@@ -33,7 +33,7 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
   to_port     = 443
   ip_protocol = "tcp"
 
-  tags = local.tags  
+  tags = local.tags
 }
 
 # resource "aws_security_group" "db_access" {
