@@ -13,5 +13,4 @@ runcmd:
  - aws s3 cp s3://maximumpigs-various/Splunk.License /opt/splunk.license
  - aws s3 cp s3://maximumpigs-various/index_and_forward.tgz /opt/index_and_forward.tgz
  - dpkg -i /opt/splunk.deb
- - /opt/splunk/bin/splunk enable boot-start -user splunk -systemd-managed 1
  - rm /opt/splunk.deb

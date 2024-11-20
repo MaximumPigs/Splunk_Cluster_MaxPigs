@@ -1,7 +1,7 @@
 locals {
   project = "Splunk_Cluster"
 
-  searchhead_count     = 2
+  searchhead_count     = 0
   indexer_count        = 2
   heavyforwarder_count = 0
   manager_count        = 2
