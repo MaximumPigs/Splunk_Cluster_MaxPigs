@@ -1,0 +1,13 @@
+# Weekly pull requests for new provider versions, TF_Modules_AWS release tags
+# and GitHub Actions.
+version: 2
+updates:
+  - package-ecosystem: terraform
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
