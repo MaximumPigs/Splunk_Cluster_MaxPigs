@@ -1,0 +1,17 @@
+# Checkov configuration (loaded automatically from the repository root).
+# Each skip is a deliberate decision for a single-person home account.
+framework:
+  - terraform
+compact: true
+quiet: true
+skip-check:
+  # Modules are pinned to release tags of TF_Modules_AWS, which are reviewed
+  # before tagging; commit hashes would hide which release is in use.
+  - CKV_TF_1    # Module source pinned to a commit hash
+  # No NAT gateway (cost): nodes need a public IP for outbound internet and are
+  # protected by the trusted-IP security groups.
+  - CKV_AWS_88  # EC2 instance should not have a public IP
+  # Load balancer cost and agility trade-offs while it is being reworked.
+  - CKV_AWS_91  # Load balancer access logging (S3 storage)
+  - CKV_AWS_150 # Load balancer deletion protection
+  - CKV_AWS_152 # NLB cross-zone load balancing (inter-AZ data charges)

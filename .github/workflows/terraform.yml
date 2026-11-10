@@ -1,0 +1,85 @@
+# Static checks and unit tests for every pull request and push to main.
+# Nothing here talks to AWS: no credentials and no backend.
+name: terraform
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least privilege for the workflow token.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Actions are pinned to full commit SHAs (tag in the comment).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.17.1
+          terraform_wrapper: false
+
+      - name: Format
+        run: terraform fmt -check -recursive -diff
+
+      # Downloads TF_Modules_AWS at the pinned tag; fails if the lock file is stale.
+      # TF_Modules_AWS is private and the workflow token can only read this
+      # repository, so the download uses the Actions secret
+      # TF_MODULES_READ_TOKEN (fine-grained token, Contents: read-only, on
+      # TF_Modules_AWS only). The credential is removed from the git config as
+      # soon as init finishes, before any third-party tool runs.
+      - name: Init (no backend)
+        env:
+          TF_MODULES_READ_TOKEN: ${{ secrets.TF_MODULES_READ_TOKEN }}
+        run: |
+          REPO_URL="https://github.com/MaximumPigs/TF_Modules_AWS.git"
+          if [ -n "${TF_MODULES_READ_TOKEN}" ]; then
+            REWRITE="url.https://x-access-token:${TF_MODULES_READ_TOKEN}@github.com/MaximumPigs/TF_Modules_AWS.git.insteadOf"
+            trap 'git config --global --unset-all "${REWRITE}" || true' EXIT
+            git config --global "${REWRITE}" "${REPO_URL}"
+          else
+            echo "::notice::TF_MODULES_READ_TOKEN is not set; downloading TF_Modules_AWS anonymously (works only if it is public)."
+          fi
+          if ! GIT_TERMINAL_PROMPT=0 terraform init -backend=false -input=false -lockfile=readonly; then
+            echo "::error title=Module download failed::Could not download TF_Modules_AWS. If it is private, add a fine-grained token with read-only Contents access to it as the Actions secret TF_MODULES_READ_TOKEN."
+            exit 1
+          fi
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Unit tests (mocked provider and Fabric lookups)
+        run: terraform test
+
+      - uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+        with:
+          tflint_version: v0.66.0
+
+      - name: TFLint
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tflint --init
+          tflint --recursive --format compact
+
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      # Security scan; accepted findings are documented in .checkov.yaml.
+      - name: Checkov
+        run: |
+          pip install --disable-pip-version-check checkov==3.4.3
+          checkov -d .
