@@ -69,6 +69,11 @@ plus one public IPv4 address per subnet. With `searchhead_count` and
 
 ## Checks
 
+TF_Modules_AWS is a private repository, so CI needs the Actions secret
+`TF_MODULES_READ_TOKEN` to download it: a fine-grained personal access token
+with access to TF_Modules_AWS only and **Contents: Read-only**. Renew it before
+it expires.
+
 CI runs these on every pull request:
 
 ```sh
