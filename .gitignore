@@ -32,3 +32,11 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Plan files can contain sensitive values
+*.tfplan
+tfplan
+tfplan.*
+
+# Local state lock info
+.terraform.tfstate.lock.info
